@@ -1,0 +1,4 @@
+# Python dependencies for Spark Amp Test GUI
+pyserial>=3.5
+platformio
+

@@ -12,6 +12,10 @@
 #include "src/SparkLEDControl.h"
 #include "src/SparkPresetControl.h"
 
+#ifdef DEBUG_MODE
+#include "src/SerialCommandHandler.h"
+#endif
+
 using namespace std;
 
 // Device Info Definitions
@@ -51,7 +55,14 @@ void setup() {
     }
     // spark_dc = new SparkDataControl();
     spark_bh.setDataControl(&spark_dc);
+
+#ifdef DEBUG_MODE
+    // Force APP mode for debug/testing
+    operationMode = SPARK_MODE_APP;
+    Serial.println("DEBUG_MODE: Forcing APP mode for testing");
+#else
     operationMode = spark_bh.checkBootOperationMode();
+#endif
 
     // Setting operation mode before initializing
     operationMode = spark_dc.init(operationMode);
@@ -77,6 +88,11 @@ void setup() {
     spark_bh.setDataControl(&spark_dc);
     // Initializing control classes
     spark_led.setDataControl(&spark_dc);
+
+#ifdef DEBUG_MODE
+    // Initialize serial command handler
+    serialCmdHandler.init(&spark_dc, presetControl);
+#endif
 
     Serial.println("Initialization done.");
 }
@@ -121,4 +137,9 @@ void loop() {
     spark_led.updateLEDs();
     // Update display
     sparkDisplay.update();
+
+#ifdef DEBUG_MODE
+    // Process serial commands
+    serialCmdHandler.processCommands();
+#endif
 }
